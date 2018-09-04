@@ -2,15 +2,17 @@ const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders');
 
 const app = express();
 const port = process.env.PORT || 5000;
+const dbURL = `mongodb+srv://asn0057:${process.env.MONGO_DB}@cluster0-aoist.mongodb.net/test?retryWrites=true?`;
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
+mongoose.connect(dbURL);
 
-//mongoose.connect(`mongodb+srv://asn0057:${process.env.MONGO_DB}@cluster0-aoist.mongodb.net/test?retryWrites=true`, { useNewUrlParser: true });
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -29,20 +31,12 @@ app.use('/products', productRoutes);
 app.use('/orders', orderRoutes);
 
 app.use((req, resp, next) => {
-    const err = new Error('Not found');
+    const err = new Error('No such API end point');
     err.status = 404;
     next(err);
 });
 
 app.use((err, req, resp, next) => {
     resp.status(err.status || 500);
-    resp.json({ message: err.message })
+    resp.json({ message: err.message });
 });
-
-
-
-
-
-
-
-//If anyone else has this problem just replace Product.remove({ _id: id }) with Product.findByIdAndRemove(id) it worked for me
