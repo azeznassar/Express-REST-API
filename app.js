@@ -12,6 +12,7 @@ const dbURL = `mongodb+srv://asn0057:${process.env.MONGO_DB}@cluster0-aoist.mong
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
 mongoose.connect(dbURL);
+mongoose.Promise = global.Promise;
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
