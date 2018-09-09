@@ -9,7 +9,7 @@ const orderRoutes = require('./api/routes/orders');
 const app = express();
 const port = process.env.PORT || 5000;
 const dbURL = `mongodb+srv://asn0057:${process.env.MONGO_DB}@cluster0-aoist.mongodb.net/test?retryWrites=true?`;
-
+/* eslint-disable no-console */
 app.listen(port, () => console.log(`Server running on port ${port}`));
 mongoose.connect(dbURL);
 mongoose.Promise = global.Promise;
@@ -37,7 +37,7 @@ app.use((req, resp, next) => {
     next(err);
 });
 
-app.use((err, req, resp, next) => {
+app.use((err, req, resp) => {
     resp.status(err.status || 500);
     resp.json({ message: err.message });
 });

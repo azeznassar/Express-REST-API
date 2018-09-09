@@ -3,7 +3,7 @@ const Product = require('../models/product');
 const mongoose = require('mongoose');
 const router = express.Router();
 
-router.get('/', (req, resp, next) => {
+router.get('/', (req, resp) => {
     Product.find()
         .select('-__v')
         .exec()
@@ -17,28 +17,21 @@ router.get('/', (req, resp, next) => {
                         price: doc.price,
                         request: {
                             type: 'GET',
-                            url: 'http://localhost:5000/products/' + doc._id
+                            url: `http://localhost:5000/products/${doc._id}`
                         }
-                    }
+                    };
                 })
-            }
+            };
             if (docs.length >= 0) {
                 resp.status(200).json(response);
             } else {
-                resp.status(200).json({
-                    message: 'No entries found'
-                });
+                resp.status(200).json({ message: 'No entries found' });
             }
         })
-        .catch(err => {
-            console.log(err);
-            resp.status(500).json({
-                error: err
-            });
-        });
+        .catch(error => resp.status(500).json({ error }));
 });
 
-router.post('/', (req, resp, next) => {
+router.post('/', (req, resp) => {
     const product = new Product({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
@@ -46,7 +39,6 @@ router.post('/', (req, resp, next) => {
     });
 
     product.save().then(result => {
-        console.log(result);
         resp.status(201).json({
             message: 'Product added to database',
             product: {
@@ -55,40 +47,30 @@ router.post('/', (req, resp, next) => {
                 price: result.price,
                 request: {
                     type: 'GET',
-                    url: 'http://localhost:5000/products/' + result._id
+                    url: `http://localhost:5000/products/${result._id}`
                 }
             }
         });
     })
-    .catch(err => {
-        console.log(err);
-        resp.status(500).json({
-            error: err
-        });
-    });
+        .catch(error => resp.status(500).json({ error }));
 });
 
-router.get('/:id', (req, resp, next) => {
+router.get('/:id', (req, resp) => {
     const id = req.params.id;
     Product.findById(id) 
         .select('-__v')
         .exec()
         .then(doc => {
-            console.log(doc);
             if (doc) {
                 resp.status(200).json(doc);
             } else {
                 resp.status(404).json({ error: 'No valid entry found for ID' });
             }
         })
-        .catch(err => {
-            resp.status(500).json({
-                error: err
-            });
-        });
+        .catch(error => resp.status(500).json({ error }));
 });
 
-router.patch('/:id', (req, resp, next) => {
+router.patch('/:id', (req, resp) => {
     const id = req.params.id;
     const updateOps = {};
 
@@ -98,38 +80,24 @@ router.patch('/:id', (req, resp, next) => {
 
     Product.update({ _id: id }, { $set: updateOps })
         .exec()
-        .then(result => {
+        .then(() => {
             resp.status(200).json({ 
                 message: 'Product updated',
                 request: {
                     type: 'GET',
-                    url: 'http://localhost:5000/products/' + id
+                    url: `http://localhost:5000/products/${id}`
                 }
             });
         })
-        .catch(err => {
-            console.log(err);
-            resp.status(500).json({
-                error: err
-            });
-        });
+        .catch(error => resp.status(500).json({ error }));
 });
 
-router.delete('/:id', (req, resp, next) => {
+router.delete('/:id', (req, resp) => {
     const id = req.params.id;
-    Product.remove({ _id: id })
+    Product.deleteOne({ _id: id })
         .exec()
-        .then(result => {
-            resp.status(200).json({
-                message: "Product deleted"
-            });
-        })
-        .catch(err => {
-            console.log(err);
-            resp.status(500).json({
-                error: err
-            });
-        });
+        .then(() => resp.status(200).json({ message: 'Product deleted' }))
+        .catch(error => resp.status(500).json({ error }));
 });
 
 module.exports = router;

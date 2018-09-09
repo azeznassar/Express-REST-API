@@ -1,10 +1,11 @@
 {
   "name": "express-rest-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "RESTful API w/ Express & MongoDB",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "lint": "eslint ./"
   },
   "keywords": [],
   "author": "Azez Nassar",
@@ -15,5 +16,8 @@
     "mongoose": "^5.2.12",
     "morgan": "^1.9.0",
     "nodemon": "^1.18.4"
+  },
+  "devDependencies": {
+    "eslint": "^5.5.0"
   }
 }
