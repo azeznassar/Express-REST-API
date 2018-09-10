@@ -1,7 +1,31 @@
 const express = require('express');
-const Product = require('../models/product');
 const mongoose = require('mongoose');
+const multer = require('multer');
+const Product = require('../models/product');
 const router = express.Router();
+
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, './uploads/');
+    },
+    filename: function(req, file, cb) {
+        cb(null, new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+        cb(null, true);
+    } else {
+        cb(new Error('The image must be .jpg or .png'), false);
+    }
+};
+
+const upload = multer({ 
+    storage, 
+    limits: { fileSize: 1024 * 1024 * 7 },
+    fileFilter,
+});
 
 router.get('/', (req, resp) => {
     Product.find()
@@ -15,6 +39,7 @@ router.get('/', (req, resp) => {
                         _id: doc._id,
                         name: doc.name,
                         price: doc.price,
+                        image: `http://localhost:5000/${doc.image}`,
                         request: {
                             type: 'GET',
                             url: `http://localhost:5000/products/${doc._id}`
@@ -31,11 +56,12 @@ router.get('/', (req, resp) => {
         .catch(error => resp.status(500).json({ error }));
 });
 
-router.post('/', (req, resp) => {
+router.post('/', upload.single('image'), (req, resp) => {
     const product = new Product({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
-        price: req.body.price
+        price: req.body.price,
+        image: req.file.path
     });
 
     product.save().then(result => {
@@ -45,6 +71,7 @@ router.post('/', (req, resp) => {
                 _id: result._id,
                 name: result.name,
                 price: result.price,
+                image: `http://localhost:5000/${result.image}`,
                 request: {
                     type: 'GET',
                     url: `http://localhost:5000/products/${result._id}`
